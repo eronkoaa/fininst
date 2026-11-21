@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ЕГЭ Обществознание: Финансовые институты</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50; /* Строгий темно-синий */
+            --accent-color: #3498db; /* Деловой голубой */
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-main: #212529;
+            --text-secondary: #6c757d;
+            --success: #28a745;
+            --warning: #ffc107;
+            --error: #dc3545;
+            --border-radius: 4px;
+            --shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        #app {
+            width: 100%;
+            max-width: 900px;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 600px;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 25px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        h1 { font-size: 1.25rem; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
+        h2 { font-size: 1.1rem; margin-bottom: 15px; color: var(--primary-color); font-weight: 600; }
+
+        .screen {
+            padding: 30px;
+            flex-grow: 1;
+            display: none;
+            flex-direction: column;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .screen.active { display: flex; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Start Screen */
+        .intro-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+        }
+        
+        .intro-icon { margin-bottom: 20px; color: var(--primary-color); }
+
+        /* Quiz Layout */
+        .quiz-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            height: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .quiz-layout { grid-template-columns: 1fr; }
+            .question-image { height: 180px !important; }
+        }
+
+        .visual-col {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .question-image {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-radius: var(--border-radius);
+            background-color: #eee;
+            filter: grayscale(20%); /* More business-like */
+        }
+
+        .content-col {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border: 1px solid #ced4da;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .option-label:hover { background-color: #f1f3f5; border-color: var(--accent-color); }
+        
+        .option-label input { margin-right: 12px; transform: scale(1.2); accent-color: var(--primary-color); }
+
+        .option-label.selected {
+            background-color: #e7f1ff;
+            border-color: var(--accent-color);
+            font-weight: 500;
+        }
+
+        .feedback-box {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--primary-color);
+            font-size: 0.95rem;
+            display: none;
+        }
+        
+        .feedback-box.visible { display: block; }
+        .feedback-box.error { border-left-color: var(--error); }
+        .feedback-box.success { border-left-color: var(--success); }
+        .feedback-box.partial { border-left-color: var(--warning); }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            margin-top: auto;
+            align-self: flex-end;
+            transition: background 0.2s;
+        }
+
+        .btn-primary:hover { background-color: #1a252f; }
+        .btn-primary:disabled { background-color: #adb5bd; cursor: not-allowed; }
+
+        /* Results */
+        .result-summary {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: var(--border-radius);
+        }
+        
+        .score-big { font-size: 2.5rem; font-weight: bold; color: var(--primary-color); }
+
+        .review-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        .review-table th, .review-table td {
+            padding: 10px;
+            border-bottom: 1px solid #dee2e6;
+            text-align: left;
+        }
+        
+        .review-table th { background-color: #f1f3f5; }
+        .status-badge {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        .badge-ok { background: #d4edda; color: #155724; }
+        .badge-warn { background: #fff3cd; color: #856404; }
+        .badge-fail { background: #f8d7da; color: #721c24; }
+
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <header>
+        <h1>Финансовые институты</h1>
+    </header>
+
+    <!-- Start Screen -->
+    <main id="start-screen" class="screen active">
+        <div class="intro-content">
+            <svg class="intro-icon" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M3 21h18M5 21V7l8-4 8 4v14M8 21v-9a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v9" />
+            </svg>
+            <h2>Тренировочный тест ЕГЭ</h2>
+            <p style="max-width: 500px; margin-bottom: 30px; color: var(--text-secondary);">
+                Тема: <strong>Финансовые институты</strong>.<br>
+                Формат заданий приближен к реальным экзаменационным материалам.<br>
+                Включает задания с множественным выбором (выберите все верные утверждения).
+            </p>
+            <button id="start-btn" class="btn-primary">Начать выполнение</button>
+        </div>
+    </main>
+
+    <!-- Quiz Screen -->
+    <main id="quiz-screen" class="screen">
+        <div class="quiz-layout">
+            <div class="visual-col">
+                <img id="q-image" class="question-image" src="" alt="Иллюстрация">
+            </div>
+            
+            <div class="content-col">
+                <div class="progress-header">
+                    <span id="q-counter">Задание 1 из 20</span>
+                    <span>Тип: Множественный выбор</span>
+                </div>
+
+                <h2 id="q-text">Текст вопроса...</h2>
+                
+                <div id="options-container" class="options-grid">
+                    <!-- Checkboxes injected here -->
+                </div>
+
+                <div id="feedback" class="feedback-box">
+                    <strong id="feedback-title">Пояснение:</strong>
+                    <p id="explanation-text" style="margin-top: 5px;"></p>
+                </div>
+
+                <button id="next-btn" class="btn-primary" disabled>Проверить ответ</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Result Screen -->
+    <main id="result-screen" class="screen">
+        <div class="result-summary">
+            <h2>Результат выполнения</h2>
+            <div class="score-big"><span id="final-score">0</span> / 40</div>
+            <p id="result-msg"></p>
+        </div>
+
+        <h3>Анализ ответов:</h3>
+        <div style="overflow-y: auto; max-height: 300px;">
+            <table class="review-table">
+                <thead>
+                    <tr>
+                        <th>№</th>
+                        <th>Баллы</th>
+                        <th>Вопрос (кратко)</th>
+                    </tr>
+                </thead>
+                <tbody id="review-body"></tbody>
+            </table>
+        </div>
+
+        <button id="restart-btn" class="btn-primary" style="margin-top: 20px;">Вернуться к началу</button>
+    </main>
+</div>
+
+<script>
+/**
+ * DATA: Questions
+ * Focus: Banks, Money functions, Stocks/Bonds basics, Financial market infrastructure.
+ * Excluded: Inflation, Taxes, Overdraft, Clearing, Corporate Law details.
+ */
+const questions = [
+    {
+        id: 1,
+        question: "Выберите верные утверждения о функциях Центрального банка РФ:",
+        options: [
+            "Выдает кредиты частным лицам под низкий процент",
+            "Обладает монопольным правом на эмиссию наличных денег",
+            "Хранит золотовалютные резервы страны",
+            "Открывает счета коммерческим предприятиям",
+            "Осуществляет надзор за деятельностью коммерческих банков"
+        ],
+        correctIndices: [1, 2, 4],
+        explanation: "ЦБ не работает с физлицами и фирмами напрямую. Его функции: эмиссия, хранение резервов, надзор.",
+        imgPrompt: "central bank building architecture minimal blue sky"
+    },
+    {
+        id: 2,
+        question: "Какие из перечисленных функций выполняют деньги в экономике?",
+        options: [
+            "Мера стоимости",
+            "Средство накопления",
+            "Средство производства",
+            "Средство обращения",
+            "Средство распределения ресурсов"
+        ],
+        correctIndices: [0, 1, 3],
+        explanation: "Классические функции денег: мера стоимости, средство обращения, средство платежа, средство накопления, мировые деньги.",
+        imgPrompt: "gold coins stack macro photography clean background"
+    },
+    {
+        id: 3,
+        question: "Что отличает обыкновенную акцию от привилегированной?",
+        options: [
+            "Дает право голоса на общем собрании акционеров",
+            "Гарантирует фиксированный размер дивидендов",
+            "Доход по ней зависит от прибыли компании",
+            "Владелец имеет преимущественное право на имущество при ликвидации",
+            "Не дает права на участие в управлении"
+        ],
+        correctIndices: [0, 2],
+        explanation: "Обыкновенная акция дает право голоса, но дивиденды не фиксированы. Привилегированная акция обычно не дает голоса, но имеет фиксированный дивиденд.",
+        imgPrompt: "stock certificate document close up pen"
+    },
+    {
+        id: 4,
+        question: "Укажите характеристики облигации как ценной бумаги:",
+        options: [
+            "Является долевым инструментом",
+            "Предоставляет право голоса",
+            "Подтверждает долговые отношения эмитента и владельца",
+            "Приносит фиксированный доход (процент)",
+            "Возвращается по истечении срока"
+        ],
+        correctIndices: [2, 3, 4],
+        explanation: "Облигация — это долговая расписка (не долевая, как акция). Она не дает права голоса, но гарантирует возврат долга и процента.",
+        imgPrompt: "bond financial document seal paper texture"
+    },
+    {
+        id: 5,
+        question: "К пассивным операциям коммерческого банка относятся:",
+        options: [
+            "Выдача кредитов предприятиям",
+            "Привлечение денежных средств на депозиты",
+            "Покупка иностранной валюты",
+            "Формирование уставного капитала",
+            "Выпуск собственных акций и облигаций"
+        ],
+        correctIndices: [1, 3, 4],
+        explanation: "Пассивные операции — это формирование ресурсов банка (откуда берутся деньги): вклады, капитал, выпуск своих бумаг.",
+        imgPrompt: "bank vault door open interior safe"
+    },
+    {
+        id: 6,
+        question: "Выберите верные утверждения о банковской системе РФ:",
+        options: [
+            "Состоит только из Центрального банка",
+            "Включает Банк России и кредитные организации",
+            "Коммерческие банки независимы друг от друга",
+            "Центральный банк подчиняется коммерческим банкам",
+            "Деятельность регулируется федеральными законами"
+        ],
+        correctIndices: [1, 2, 4],
+        explanation: "Банковская система двухуровневая: ЦБ (верхний уровень) и коммерческие банки (нижний уровень). ЦБ регулирует систему.",
+        imgPrompt: "network of connected nodes finance structure"
+    },
+    {
+        id: 7,
+        question: "Что такое дивиденд?",
+        options: [
+            "Часть чистой прибыли акционерного общества",
+            "Распределяется между акционерами пропорционально числу акций",
+            "Выплачивается держателям облигаций",
+            "Размер дивиденда по обыкновенным акциям заранее неизвестен",
+            "Является платой за пользование кредитом"
+        ],
+        correctIndices: [0, 1, 3],
+        explanation: "Дивиденд — это часть прибыли АО для акционеров. Облигации получают купонный доход (процент), а не дивиденды.",
+        imgPrompt: "hand receiving coin plant growth concept"
+    },
+    {
+        id: 8,
+        question: "Какие функции выполняет фондовая биржа?",
+        options: [
+            "Устанавливает рыночную стоимость ценных бумаг",
+            "Аккумулирует свободные денежные средства",
+            "Перераспределяет капитал между отраслями",
+            "Выдает паспорта гражданам",
+            "Гарантирует безубыточность торгов"
+        ],
+        correctIndices: [0, 1, 2],
+        explanation: "Биржа организует торговлю, помогает найти цену (котировки) и перелив капитала.",
+        imgPrompt: "stock exchange trading screens blur background"
+    },
+    {
+        id: 9,
+        question: "В чем разница между дебетовой и кредитной картой?",
+        options: [
+            "По дебетовой карте можно тратить только свои средства",
+            "По кредитной карте тратятся средства банка (заемные)",
+            "Дебетовая карта всегда бесплатная в обслуживании",
+            "За использование кредитной карты часто взимается комиссия или процент",
+            "Кредитную карту нельзя использовать за границей"
+        ],
+        correctIndices: [0, 1, 3],
+        explanation: "Главное отличие: чьи деньги тратятся (свои или банка). Условия обслуживания зависят от тарифа.",
+        imgPrompt: "two plastic cards one blue one gold comparison"
+    },
+    {
+        id: 10,
+        question: "Что относится к небанковским финансовым институтам?",
+        options: [
+            "Страховые компании",
+            "Пенсионные фонды",
+            "Центральный банк",
+            "Инвестиционные фонды",
+            "Микрофинансовые организации"
+        ],
+        correctIndices: [0, 1, 3, 4],
+        explanation: "ЦБ и коммерческие банки — это банковский сектор. Страховщики, ПФР, инвестфонды и МФО — небанковские институты.",
+        imgPrompt: "insurance umbrella icon shield protection"
+    },
+    {
+        id: 11,
+        question: "Какие риски связаны с покупкой акций?",
+        options: [
+            "Риск падения рыночной цены акции",
+            "Риск банкротства компании (потеря всей суммы)",
+            "Риск невыплаты фиксированных процентов",
+            "Отсутствие гарантии получения дивидендов",
+            "Риск снижения реальной доходности"
+        ],
+        correctIndices: [0, 1, 3, 4],
+        explanation: "Акции — рисковый инструмент. Нет гарантии цены, дивидендов или сохранения капитала.",
+        imgPrompt: "roller coaster graph finance risk volatility"
+    },
+    {
+        id: 12,
+        question: "Что такое ипотека?",
+        options: [
+            "Краткосрочный кредит на покупку телефона",
+            "Долгосрочный кредит под залог недвижимости",
+            "Вид потребительского кредита",
+            "Кредит, выдаваемый только юридическим лицам",
+            "Залоговое обеспечение обязательства"
+        ],
+        correctIndices: [1, 2, 4],
+        explanation: "Ипотека — это залог недвижимости. Чаще всего это долгосрочный кредит для физлиц. Это вид залога.",
+        imgPrompt: "house model with key on table"
+    },
+    {
+        id: 13,
+        question: "Какие меры защиты вкладчиков существуют в РФ?",
+        options: [
+            "Система страхования вкладов (АСВ)",
+            "Гарантия возврата 100% суммы любого вклада",
+            "Лицензирование деятельности банков ЦБ",
+            "Надзор со стороны Центрального банка",
+            "Запрет на банкротство банков"
+        ],
+        correctIndices: [0, 2, 3],
+        explanation: "АСВ страхует только до 1,4 млн руб. Банки могут разориться. ЦБ осуществляет надзор и лицензирование.",
+        imgPrompt: "safe deposit box security lock"
+    },
+    {
+        id: 14,
+        question: "Выберите признаки наличных денег:",
+        options: [
+            "Выпускаются только Центральным банком",
+            "Существуют в виде банкнот и монет",
+            "Удобны для крупных оптовых расчетов",
+            "Обладают высокой степенью анонимности",
+            "Не имеют физической формы"
+        ],
+        correctIndices: [0, 1, 3],
+        explanation: "Наличные — это бумага/металл, их выпускает ЦБ, они анонимны. Для крупных расчетов они неудобны.",
+        imgPrompt: "paper currency bills fanned out"
+    },
+    {
+        id: 15,
+        question: "Что такое эмиссионный доход?",
+        options: [
+            "Разница между номинальной стоимостью акции и ценой её размещения",
+            "Доход от продажи товаров",
+            "Прибыль банка от выдачи кредитов",
+            "Средства, полученные эмитентом сверх номинала",
+            "Налог на прибыль предприятия"
+        ],
+        correctIndices: [0, 3],
+        explanation: "Эмиссионный доход возникает, когда компания продает свои акции дороже их номинальной стоимости.",
+        imgPrompt: "upward trend arrow profit chart"
+    },
+    {
+        id: 16,
+        question: "Какие организации входят в инфраструктуру финансового рынка?",
+        options: [
+            "Депозитарии",
+            "Реестродержатели",
+            "Продуктовые магазины",
+            "Клиринговые центры",
+            "Школы и университеты"
+        ],
+        correctIndices: [0, 1, 3],
+        explanation: "Инфраструктура финрынка обеспечивает учет прав на ценные бумаги и проведение расчетов (депозитарии, клиринг, реестродержатели).",
+        imgPrompt: "digital network connections server room abstract"
+    },
+    {
+        id: 17,
+        question: "Что характеризует коммерческий банк?",
+        options: [
+            "Является коммерческой организацией",
+            "Главная цель — получение прибыли",
+            "Имеет право привлекать вклады",
+            "Не имеет права выдавать кредиты",
+            "Работает только с государственными средствами"
+        ],
+        correctIndices: [0, 1, 2],
+        explanation: "Коммерческий банк — это фирма, цель которой прибыль. Основные операции: вклады и кредиты.",
+        imgPrompt: "modern office building glass facade corporate"
+    },
+    {
+        id: 18,
+        question: "Что такое ликвидность актива?",
+        options: [
+            "Способность актива быстро превращаться в деньги без потери стоимости",
+            "Способность приносить высокий доход",
+            "Наличие физических размеров у актива",
+            "Деньги обладают абсолютной ликвидностью",
+            "Недвижимость обладает высокой ликвидностью"
+        ],
+        correctIndices: [0, 3],
+        explanation: "Ликвидность — это скорость обмена на деньги. Деньги сами себя менять не надо (абсолютная ликвидность).",
+        imgPrompt: "water drop fluidity concept abstract blue"
+    },
+    {
+        id: 19,
+        question: "Какие права имеет владелец обыкновенной акции?",
+        options: [
+            "Участвовать в управлении обществом",
+            "Получать часть имущества при ликвидации (после расчетов с кредиторами)",
+            "Требовать обратно внесенные средства",
+            "Получать информацию о деятельности общества",
+            "Гарантированно получать дивиденды каждый год"
+        ],
+        correctIndices: [0, 1, 3],
+        explanation: "Акционер не может просто забрать деньги обратно. Дивиденды не гарантированы. Но он имеет право голоса, на ликвидацию и информацию.",
+        imgPrompt: "business meeting voting hands raised"
+    },
+    {
+        id: 20,
+        question: "Что такое капитализация компании?",
+        options: [
+            "Рыночная стоимость всех выпущенных акций компании",
+            "Сумма всех долгов компании",
+            "Рассчитывается как Цена акции × Количество акций",
+            "Показатель инвестиционной привлекательности",
+            "То же самое, что и чистая прибыль"
+        ],
+        correctIndices: [0, 2, 3],
+        explanation: "Капитализация — это цена компании на бирже. Она не равна прибыли или долгам, а отражает оценку компании инвесторами.",
+        imgPrompt: "skyscraper silhouette growing bar chart"
+    }
+];
+
+/**
+ * STATE & LOGIC
+ */
+const state = {
+    currentIdx: 0,
+    totalScore: 0, // Max 40 (20 questions * 2 points)
+    answersLog: [] 
+};
+
+// DOM Elements
+const screens = {
+    start: document.getElementById('start-screen'),
+    quiz: document.getElementById('quiz-screen'),
+    result: document.getElementById('result-screen')
+};
+
+const els = {
+    startBtn: document.getElementById('start-btn'),
+    nextBtn: document.getElementById('next-btn'),
+    restartBtn: document.getElementById('restart-btn'),
+    qCounter: document.getElementById('q-counter'),
+    qText: document.getElementById('q-text'),
+    qImage: document.getElementById('q-image'),
+    optionsContainer: document.getElementById('options-container'),
+    feedback: document.getElementById('feedback'),
+    feedbackTitle: document.getElementById('feedback-title'),
+    explanation: document.getElementById('explanation-text'),
+    finalScore: document.getElementById('final-score'),
+    resultMsg: document.getElementById('result-msg'),
+    reviewBody: document.getElementById('review-body')
+};
+
+// Image Generator (SVG Data URI) - Clean, No Text in image itself
+function getCleanImage(prompt) {
+    const hue = (prompt.length * 7) % 360;
+    const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+        <defs>
+            <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:hsl(${hue}, 20%, 95%)" />
+                <stop offset="100%" style="stop-color:hsl(${hue}, 20%, 85%)" />
+            </linearGradient>
+        </defs>
+        <rect width="800" height="600" fill="url(#bg)" />
+        <!-- Abstract geometric shapes representing finance -->
+        <circle cx="200" cy="200" r="100" fill="hsl(${hue}, 40%, 80%)" opacity="0.5" />
+        <rect x="500" y="300" width="150" height="150" fill="hsl(${hue}, 40%, 75%)" opacity="0.5" rx="10" />
+        <path d="M100 500 L300 300 L500 500" stroke="hsl(${hue}, 60%, 60%)" stroke-width="10" fill="none" opacity="0.3" />
+    </svg>`;
+    return "data:image/svg+xml;base64," + btoa(svg);
+}
+
+function init() {
+    els.startBtn.addEventListener('click', startQuiz);
+    els.restartBtn.addEventListener('click', () => switchScreen('start'));
+}
+
+function switchScreen(name) {
+    Object.values(screens).forEach(s => s.classList.remove('active'));
+    screens[name].classList.add('active');
+}
+
+function startQuiz() {
+    state.currentIdx = 0;
+    state.totalScore = 0;
+    state.answersLog = [];
+    switchScreen('quiz');
+    renderQuestion();
+}
+
+function renderQuestion() {
+    const q = questions[state.currentIdx];
+    
+    // Update Header
+    els.qCounter.textContent = `Задание ${state.currentIdx + 1} из ${questions.length}`;
+    
+    // Content
+    els.qText.textContent = q.question;
+    els.qImage.src = getCleanImage(q.imgPrompt);
+    
+    // Reset UI
+    els.optionsContainer.innerHTML = '';
+    els.feedback.classList.remove('visible', 'success', 'error', 'partial');
+    els.nextBtn.disabled = true;
+    els.nextBtn.textContent = "Проверить ответ";
+    els.nextBtn.onclick = checkAnswer; // Set handler
+
+    // Render Options (Checkboxes for multiple choice)
+    q.options.forEach((opt, idx) => {
+        const label = document.createElement('label');
+        label.className = 'option-label';
+        
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.value = idx;
+        input.addEventListener('change', () => {
+            // Visual toggle for label
+            if(input.checked) label.classList.add('selected');
+            else label.classList.remove('selected');
+            
+            // Enable button if at least one checked
+            const anyChecked = Array.from(els.optionsContainer.querySelectorAll('input')).some(i => i.checked);
+            els.nextBtn.disabled = !anyChecked;
+        });
+
+        label.appendChild(input);
+        label.appendChild(document.createTextNode(opt));
+        els.optionsContainer.appendChild(label);
+    });
+}
+
+function checkAnswer() {
+    const q = questions[state.currentIdx];
+    const inputs = els.optionsContainer.querySelectorAll('input:checked');
+    const selectedIndices = Array.from(inputs).map(i => parseInt(i.value)).sort();
+    
+    // Check Answer Logic
+    const correctIndices = q.correctIndices.sort();
+    
+    // Calculate Errors
+    // Error = Selected Wrong OR Missed Right
+    let errors = 0;
+    
+    // Check selected wrong ones
+    selectedIndices.forEach(idx => {
+        if (!correctIndices.includes(idx)) errors++;
+    });
+    
+    // Check missed right ones
+    correctIndices.forEach(idx => {
+        if (!selectedIndices.includes(idx)) errors++;
+    });
+
+    // Scoring: 2 pts (0 errors), 1 pt (1 error), 0 pts (>1 error)
+    let points = 0;
+    if (errors === 0) points = 2;
+    else if (errors === 1) points = 1;
+    else points = 0;
+
+    state.totalScore += points;
+
+    // Log
+    state.answersLog.push({
+        id: q.id,
+        question: q.question,
+        points: points,
+        userAnswer: selectedIndices.map(i => q.options[i]).join(', ') || "Нет ответа",
+        correctAnswer: correctIndices.map(i => q.options[i]).join(', ')
+    });
+
+    // Show Feedback
+    els.feedback.classList.add('visible');
+    if (points === 2) {
+        els.feedback.classList.add('success');
+        els.feedbackTitle.textContent = "Верно! (2 балла)";
+    } else if (points === 1) {
+        els.feedback.classList.add('partial');
+        els.feedbackTitle.textContent = "Частично верно (1 балл). Допущена одна ошибка.";
+    } else {
+        els.feedback.classList.add('error');
+        els.feedbackTitle.textContent = "Неверно (0 баллов). Допущено более одной ошибки.";
+    }
+    els.explanation.textContent = q.explanation;
+    
+    // Disable inputs
+    els.optionsContainer.querySelectorAll('input').forEach(i => i.disabled = true);
+    
+    // Change button to Next
+    els.nextBtn.textContent = state.currentIdx === questions.length - 1 ? "Завершить тест" : "Следующее задание";
+    els.nextBtn.onclick = handleNextClick;
+}
+
+function handleNextClick() {
+    if (state.currentIdx < questions.length - 1) {
+        state.currentIdx++;
+        renderQuestion();
+    } else {
+        finishQuiz();
+    }
+}
+
+function finishQuiz() {
+    switchScreen('result');
+    els.finalScore.textContent = state.totalScore;
+    
+    const percent = (state.totalScore / (questions.length * 2)) * 100;
+    if (percent > 85) els.resultMsg.textContent = "Отличный результат! Вы хорошо разбираетесь в финансовых институтах.";
+    else if (percent > 60) els.resultMsg.textContent = "Хороший результат, но рекомендуется повторить теорию.";
+    else els.resultMsg.textContent = "Стоит внимательно изучить тему финансовых инструментов и банков.";
+
+    // Render Table
+    els.reviewBody.innerHTML = '';
+    state.answersLog.forEach((log, idx) => {
+        const tr = document.createElement('tr');
+        let badgeClass = log.points === 2 ? 'badge-ok' : (log.points === 1 ? 'badge-warn' : 'badge-fail');
+        let badgeText = `${log.points} б.`;
+        
+        tr.innerHTML = `
+            <td>${idx + 1}</td>
+            <td><span class="status-badge ${badgeClass}">${badgeText}</span></td>
+            <td>${log.question.substring(0, 50)}...</td>
+        `;
+        els.reviewBody.appendChild(tr);
+    });
+}
+
+init();
+</script>
+</body>
+</html>
